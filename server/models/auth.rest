@@ -1,0 +1,3 @@
+GET http://localhost:3000/api/authorization/
+Content-Type: application/json
+Cookie: session=%7B%22UUID%22%3A%2261f758245ed51b9cfe4c523e%22%2C%22username%22%3A%22clonify%22%2C%22_id%22%3A%2261f79e7420e78e890641959e%22%2C%22createdAt%22%3A%222022-01-31T08%3A31%3A48.618Z%22%2C%22__v%22%3A0%7D

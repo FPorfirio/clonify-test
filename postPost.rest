@@ -1,0 +1,8 @@
+POST http://localHost:3000/api/posts
+Content-Type: application/json
+
+{
+	"title": "sont aut facere repellat provident occaecati excepturi optio reprehenderit",
+  "content": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+	"imgUrl": "/post4"
+}
