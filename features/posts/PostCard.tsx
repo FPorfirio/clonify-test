@@ -1,95 +1,76 @@
 import { PostEntity } from "../../common/types/types";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { useDeletePostMutation } from "./postApi";
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  Button,
-} from "@chakra-ui/react";
-
-interface DeleteDialogProps {
-  isOpen: boolean;
-  deletePost(): void;
-  closeDialog(): void;
-}
-
-const DeleteDialog = ({
-  isOpen,
-  deletePost,
-  closeDialog,
-}: DeleteDialogProps) => {
-  const cancelRef = useRef() as any;
-
-  return (
-    <>
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={closeDialog}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Post
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Are you sure? You cant undo this action afterwards.
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={closeDialog}>
-                Cancel
-              </Button>
-              <Button colorScheme="red" onClick={deletePost} ml={3}>
-                Delete
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
-  );
-};
+import { useDeletePostMutation, useUpdatePostMutation } from "./postApi";
+import { DeleteDialog } from "../../common/components/DeleteDialog";
+import { useDisclosure, Button } from "@chakra-ui/react";
+import { useEditable } from "../../common/hooks/hooks";
 
 export const PostCard = ({ post }: { post: PostEntity }) => {
   const { title, content, imgUrl, id } = post;
+
   const [
-    deletePostTrigger, // This is the mutation trigger
-    { isLoading, data }, // This is the destructured mutation result
+    deletePostTrigger, // This is the action that triggers the mutation query
   ] = useDeletePostMutation();
-  const [isOpenDialog, setIsOpenDialog] = useState(false);
-
-  const closeDialog = () => setIsOpenDialog(false);
-
-  const openDialog = () => setIsOpenDialog(true);
+  const [
+    updatePostTrigger,
+    { isLoading, data }, //This is the destructured mutation result,
+  ] = useUpdatePostMutation();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    onInput,
+    makeEditable,
+    editableProps,
+    editableValue,
+    isEditable,
+    editableRef,
+  } = useEditable();
 
   const deletePost = () => {
     deletePostTrigger(id);
-    closeDialog();
+    onClose();
+  };
+
+  const updatePost = () => {
+    const updatedPost = {
+      content: editableValue,
+    };
+    updatePostTrigger({ id, updatedPost });
+    makeEditable(!isEditable);
   };
 
   return (
     <article className="border-2 border-transparent flex flex-col h-140 overflow-hidden relative rounded-lg shadow-2xl shadow-blue-500 w-118">
-      <div className="bg-indigo-100 font-medium px-4 py-2 text-2xl text-cyan-800 relative">
+      <div className="bg-indigo-100 h-28 font-medium px-4 py-2 text-2xl text-cyan-800 relative">
         <h2>{title}</h2>
-        <button
-          onClick={openDialog}
-          className="absolute bg-blue-400 bottom-2 h-10 right-4 rounded-full w-10"
-        >
-          <Image
-            alt={"post-img"}
-            width="20"
-            height="20"
-            objectFit="cover"
-            src={`/trash.svg`}
-          />
-        </button>
+        <div className="absolute bottom-0 flex flex-col gap-2 h-full right-2 justify-center">
+          <button
+            onClick={onOpen}
+            className=" bg-blue-400 bottom-2 h-10 right-4 rounded-full w-10"
+          >
+            <Image
+              alt={"post-img"}
+              width="20"
+              height="20"
+              objectFit="cover"
+              src={`/trash.svg`}
+            />
+          </button>
+          <button
+            onClick={() => {
+              makeEditable(!isEditable);
+            }}
+            className=" bg-blue-400 bottom-2 h-10 right-4 rounded-full w-10"
+          >
+            <Image
+              alt={"post-img"}
+              width="20"
+              height="20"
+              objectFit="cover"
+              src={`/editPen.svg`}
+            />
+          </button>
+        </div>
       </div>
       <div className="relative flex-grow">
         <Image
@@ -99,13 +80,40 @@ export const PostCard = ({ post }: { post: PostEntity }) => {
           src={`/postAssets${imgUrl}`}
         />
       </div>
-      <p className="absolute backdrop-blur-lg bottom-0 px-2 py-2 text-black text-center text-lg">
+
+      <p
+        ref={editableRef}
+        onInput={onInput}
+        {...editableProps}
+        className={`${
+          isEditable
+            ? "bg-white border-2 border-blue-400 h-full outline-blue-400"
+            : ""
+        } absolute backdrop-blur-lg bottom-0 px-2 py-2 text-black text-center text-lg`}
+      >
         {content}
       </p>
+      {isEditable && (
+        <div className="absolute bottom-2 flex gap-8 items-center justify-center left-0 w-full">
+          <Button variant="outline" colorScheme="blue" onClick={updatePost}>
+            Save
+          </Button>
+          <Button
+            variant="outline"
+            colorScheme="blue"
+            onClick={() => {
+              makeEditable(!isEditable);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+
       <DeleteDialog
-        isOpen={isOpenDialog}
+        isOpen={isOpen}
         deletePost={deletePost}
-        closeDialog={closeDialog}
+        closeDialog={onClose}
       />
     </article>
   );

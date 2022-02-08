@@ -22,7 +22,9 @@ export const LoginView = () => {
     }
   }, [data, dispatch]);
 
-  const handleLogin = (e: React.MouseEvent) => {
+  const handleLogin = (
+    e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>
+  ) => {
     e.preventDefault();
     loginTrigger({
       username: username.value,
@@ -35,7 +37,7 @@ export const LoginView = () => {
       <div className="flex flex-grow items-center justify-center">
         <Image alt="login-img" src="/padlock.svg" height="100" width="100" />
       </div>
-      <form action="">
+      <form onSubmit={handleLogin} action="">
         <FormControl>
           <FormLabel>Username</FormLabel>
           <Input {...username} />
@@ -49,7 +51,7 @@ export const LoginView = () => {
           mt="2"
           isLoading={isLoading}
           colorScheme="green"
-          onClick={handleLogin}
+          type="submit"
         >
           Submit
         </Button>
