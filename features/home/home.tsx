@@ -4,7 +4,6 @@ import { useDisclosure } from "@chakra-ui/react";
 import { LoginModal } from "../auth/auth";
 import { selectIsAuthenticated } from "../auth/authSlice";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
 
 export const Home = () => {
   const { data: posts, isFetching } = useGetPostsQuery();
@@ -17,7 +16,7 @@ export const Home = () => {
         {posts && <PostList posts={posts} />}
         {<PostForm />}
         <LoginModal
-          isOpen={!isAuthenticated}
+          isOpen={isAuthenticated}
           onOpen={onOpen}
           onClose={onClose}
         />
